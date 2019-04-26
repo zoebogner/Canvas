@@ -52,21 +52,18 @@ function myJQueryCode(){
                 $.getJSON('/api/v1/courses/' + course + '/enrollments?user_id=' + ENV['current_user_id'], function(data) {
                     for (var i = 0; i < data.length; i++) {
                         userRole = data[i].role;
-
+                        // Check if the user's Canvas role matches ours
                         if (userRole == role) {
-                            if(window.location.pathname.split("/")["3"] != "gradebook") {
-                                // Display an unauthorized message
+                            // Remove the Quizzes.Next iframe
+                            $("iframe#tool_content").remove();
+                            // Display an "Access Denied" message after 2 second delay.
+                            // When a user is in SpeedGrader, the Quizzes.Next iframe loads briefly before it's replaced by the SpeedGrader interface.
+                            // We'll remove the iframe, display a small loading animation for two seconds, then replace the animation with an "Access Denied" message.
+                            $(".tool_content_wrapper").append('<div class="rolehideloader" style="text-align: center; margin-top: 5rem;"><img src="/images/ajax-loader-linear.gif" alt="Loading"></div>');
+                            setTimeout(function(){
+                                $(".rolehideloader").remove();
                                 $(".tool_content_wrapper").append('<div id="unauthorized_message" class="ic-Error-page"><img class="ic-Error-img" role="presentation" alt="" aria-hidden="true" src="/images/401_permissions.svg"><h1>Access Denied</h1><p>You don\'t have access to view this resource.</p></div>');
-                                // Remove the Quizzes.Next iframe
-                                $("iframe#tool_content").remove();
-
-                            } else {
-                                /* When a user is in SpeedGrader, the Quizzes.Next iframe loads briefly before
-                                *  it's replaced by the SpeedGrader interface. We'll show these users a brief
-                                *  loading message instead of "Access Denied". */
-                                $(".tool_content_wrapper").append("Loading..");
-                                $("iframe#tool_content").remove();
-                            }
+                            }, 2000);
                         }
                     }
                 });
